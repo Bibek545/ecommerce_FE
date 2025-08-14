@@ -84,7 +84,7 @@ export const renewAccessJWT = async () => {
   return accessJWT;
 };
 
-// Request password reset OTP
+// Request password reset OTPy
 export const requestPassResetOTPApi = async (payload) => {
   const obj = {
     url: authEP + "/otp",
@@ -111,8 +111,7 @@ export const resetPassApi = async (payload) => {
 export const getAllCategories = () => apiProcesser({ url: categoriesEP });
 export const getCategoryById = (id) =>
   apiProcesser({ url: `${categoriesEP}/${id}` });
-export const getSubCategories = (parentId) =>
-  apiProcesser({ url: `${categoriesEP}/${parentId}/sub-categories` });
+// export const getSubCategories = (catId) => api.get(`/categories/${catId}/sub-categories`);
 
 //products//
 export const getAllProducts = (q = "") => apiProcesser({ url: productsEP + q });
