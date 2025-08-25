@@ -1,142 +1,119 @@
 import { toast } from "react-toastify";
-import { setUser, logout,setLoading, setAuthReady } from "./userSlice.js";
-import { postNewUser, loginUser, fetchProfile } from "./userAxios.js";
-import { renewAccessJWT } from "../../helpers/axiosHelpers.js";
+import { setUser, logout, setLoading } from "./userSlice.js";
+import { postNewUser, loginUser } from "./userAxios.js";
+import { apiProcesser, authEP } from "../../helpers/axiosHelpers.js";
+// import { setUser, logout,setLoading, setAuthReady } from "./userSlice.js";
+// import { postNewUser, loginUser, fetchProfile } from "./userAxios.js";
+// import { renewAccessJWT } from "../../helpers/axiosHelpers.js";
 
 
-// SIGNUP ACTION
+//signup
 export const userSignupAction = (userObj) => async () => {
   const p = postNewUser(userObj);
   toast.promise(p, { pending: "Signing up…" });
   return p;
 };
 
-// LOGIN ACTION
-// export const userSignInAction = (cred) => async (dispatch) => {
-//   try {
-//     const { status, message, tokens, user } = await loginUser(cred);
+//fetch user data
+export const getUserDetailAction = () => async (dispatch) => {
+  try {
+    // GET /auth/profile (private)
+    const res = await apiProcesser({
+      method: "get",
+      url: `${authEP}/profile`,
+      isPrivate: true,
+    });
 
-//     toast[status](message);
+    // backend may return { user } or { data: { user } }
+    const user = res?.user ?? res?.data?.user ?? res?.data;
+    if (user) dispatch(setUser(user));
+    return user;
+  } catch (e) {
+    // If unauthorized, clear tokens and logout
+    if (e?.response?.status === 401) {
+      sessionStorage.removeItem("accessJWT");
+      localStorage.removeItem("refreshJWT");
+      dispatch(logout());
+    }
+    throw e;
+  }
+};
 
-//     if (status === "success") {
-//       // Save JWTs
-//       sessionStorage.setItem("accessJWT", tokens.accessJWT);
-//       localStorage.setItem("refreshJWT", tokens.refreshJWT);
-
-//       // Update Redux store with user info
-//       dispatch(setUser(user));
-
-//       return { status: "success" };
-//     } else {
-//       return { status: "error" };
-//     }
-//   } catch (e) {
-//     toast.error("Login failed. Please try again.");
-//     return { status: "error" };
-//   }
-// };
-
-// // LOGOUT ACTION
-// export const userLogoutAction = () => (dispatch) => {
-//   sessionStorage.clear();
-//   localStorage.clear();
-//   dispatch(logout());
-// };
-
-// //fetch user Action
-
-// // FETCH USER (MAKE THIS A THUNK)
-// export const fetchUserAction = () => async (dispatch) => {
-//   const { status, payload } = await fetchProfile();
-//   if (status === "success" && payload?._id) {
-//     dispatch(setUser(payload));
-//   }
-// };
-
-// // AUTO LOGIN (DISPATCH THE THUNK ABOVE, NOT THE API FUNCTION)
-// export const autoLoginUser = () => async (dispatch) => {
-//   const accessJWT = sessionStorage.getItem("accessJWT");
-//   if (accessJWT) {
-//     await dispatch(fetchUserAction());
-//     return;
-//   }
-
-//   const refreshJWT = localStorage.getItem("refreshJWT");
-//   if (refreshJWT) {
-//     const { payload } = await renewAccessJWT(); // expect new access token string
-//     if (payload) {
-//       sessionStorage.setItem("accessJWT", payload);
-//       await dispatch(fetchUserAction());
-//     }
-//   }
-// };
-
+//login//
 export const userSignInAction = (cred) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
     const { status, message, tokens, user } = await loginUser(cred);
-    toast[status](message);
+
+    // toast by status (success|error)
+    toast[status || "info"](
+      message || (status === "success" ? "Logged in" : "Login failed")
+    );
 
     if (status === "success") {
-      sessionStorage.setItem("accessJWT", tokens.accessJWT);
-      localStorage.setItem("refreshJWT", tokens.refreshJWT);
-      dispatch(setUser(user));
-      dispatch(setLoading(false));
+      // Save JWTs
+      if (tokens?.accessJWT)
+        sessionStorage.setItem("accessJWT", tokens.accessJWT);
+      if (tokens?.refreshJWT)
+        localStorage.setItem("refreshJWT", tokens.refreshJWT);
+
+      // Update Redux store with user info
+      if (user) dispatch(setUser(user));
+
       return { status: "success" };
     }
-
-    dispatch(setLoading(false));
     return { status: "error" };
-  } catch (err) {
-    dispatch(setLoading(false));
-    dispatch(setError(err?.message || "Login failed"));
-    toast.error("Login failed. Please try again.");
+  } catch (e) {
+    toast.error(e?.message || "Login failed. Please try again.");
     return { status: "error" };
   }
 };
 
-// FETCH PROFILE
-export const fetchUserAction = () => async (dispatch) => {
-  try {
-    dispatch(setLoading(true));
-    const { status, payload } = await fetchProfile();
-    if (status === "success" && payload?._id) {
-      dispatch(setUser(payload));
-    }
-    dispatch(setLoading(false));
-  } catch (err) {
-    // If access token expired, let autoLogin handle renewal.
-    dispatch(setLoading(false));
-  }
-};
+//auto logion//
 
-// AUTO‑LOGIN ON APP START
-export const autoLoginUser = () => async (dispatch) => {
+export const restoreSession = () => async (dispatch) => {
   try {
     const access = sessionStorage.getItem("accessJWT");
+    const refresh = localStorage.getItem("refreshJWT");
+
+    // If access exists, just pull profile
     if (access) {
-      const { status, payload } = await fetchProfile();
-      if (status === "success") dispatch(setUser(payload));
+      await dispatch(getUserDetailAction());
       return;
     }
-    const refresh = localStorage.getItem("refreshJWT");
+
+    // If only refresh exists, mint a new access and then pull profile
     if (refresh) {
-      const { payload } = await renewAccessJWT();
-      if (payload) {
-        sessionStorage.setItem("accessJWT", payload);
-        const prof = await fetchProfile();
-        if (prof.status === "success") dispatch(setUser(prof.payload));
+      const res = await apiProcesser({
+        method: "post",
+        url: `${authEP}/refresh-token`,
+        data: { token: refresh },
+      });
+
+      const newAccess = res?.tokens?.accessJWT ?? res?.accessJWT;
+      if (newAccess) {
+        sessionStorage.setItem("accessJWT", newAccess);
+        await dispatch(getUserDetailAction());
+        return;
       }
     }
-  } finally {
-    // VERY IMPORTANT: signal that bootstrap is finished
-    dispatch(setAuthReady(true));
+
+    // no valid tokens -> ensure logged out state
+    dispatch(logout());
+  } catch {
+    sessionStorage.removeItem("accessJWT");
+    localStorage.removeItem("refreshJWT");
+    dispatch(logout());
   }
 };
 
-// LOGOUT
+//logout//
 export const userLogoutAction = () => (dispatch) => {
-  sessionStorage.clear();
-  localStorage.clear();
-  dispatch(logout());
+  try {
+    sessionStorage.clear();
+    localStorage.clear();
+  } finally {
+    dispatch(logout());
+    toast.info("Logged out");
+  }
 };

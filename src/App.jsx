@@ -1,5 +1,8 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { restoreSession } from "./features/users/userAction.js";
+
 import MainNavbar from "./components/MainNavbar.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
@@ -12,7 +15,6 @@ import ForgotPassword from "./pages/ForgotPassword.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import Footer from "./components/Footer.jsx";
 
-
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderHistoryPage from "./pages/OrderHistoryPage.jsx";
 import FAQ from "./pages/FAQ.jsx";
@@ -22,8 +24,10 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import TermsOfService from "./pages/TermsOfService.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
-import { useDispatch } from "react-redux";
-import { autoLoginUser } from "./features/users/userAction.js";
+// import { useDispatch } from "react-redux";
+// import { autoLoginUser } from "./features/users/userAction.js";
+import MyOrdersPage from "./pages/MyOrdersPage.jsx";
+import TrackOrderPage from "./components/TrackOrderPage.jsx";
 
 const NotFound = () => (
   <div className="text-center my-5">
@@ -33,11 +37,17 @@ const NotFound = () => (
 );
 
 export default function App() {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(autoLoginUser());
+    dispatch(restoreSession());
   }, [dispatch]);
+
+  //   const dispatch = useDispatch();
+
+  // useEffect(() => {
+  //   dispatch(autoLoginUser());
+  // }, [dispatch]);
   return (
     <BrowserRouter>
       <MainNavbar />
@@ -53,24 +63,29 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
 
         {/* product description page */}
+        {/* Product detail */}
+
 
         {/* Product detail */}
 
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path="/category/:id" element={<CategoryPage />} />
         {/* Cart */}
-        <Route path="/cart" element={<CartPage />} />\
+        <Route path="/cart" element={<CartPage />} />{" "}
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/orders" element={<OrderHistoryPage />} />
-        {/* Catch-all */}
-        <Route path="*" element={<NotFound />} />
-        {/* existing routes… */}
+        <Route path="/track-order/:trackingId" element={<TrackOrderPage />} />
+
+        {/* Info pages */}
         <Route path="/faq" element={<FAQ />} />
         <Route path="/shipping" element={<ShippingInfo />} />
         <Route path="/refund" element={<RefundPolicy />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="terms" element={<TermsOfService />} />
+        <Route path="/terms" element={<TermsOfService />} />{" "}
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/my-orders" element={<MyOrdersPage />} />
+        {/* Catch-all */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       <Footer />

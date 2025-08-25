@@ -1,185 +1,7 @@
-// import React, { useRef, useState, useEffect } from "react";
-// import { Button, Card, Form, Alert, Spinner } from "react-bootstrap";
-// import { requestPassResetOTPApi, resetPassApi } from "../helpers/axiosHelpers.js";
-// import { useNavigate } from "react-router-dom";
-
-// const timToRequestOtpAgain = 30;
-
-// const ForgotPassword = () => {
-//   const emailRef = useRef();
-//   const otpRef = useRef();
-//   const passwordRef = useRef();
-//   const confirmPasswordRef = useRef();
-//   const navigate = useNavigate();
-
-//   const [showPassResetForm, setShowPassResetForm] = useState(false);
-//   const [isOtpPending, setOtpPending] = useState(false);
-//   const [isOtpBtnDisabled, setOtpBtnDisabled] = useState(false);
-//   const [counter, setCounter] = useState(0);
-
-//   const timToRequestOtpAgain = 30;
-
-//   useEffect(() => {
-//     if (counter > 0) {
-//       const timer = setInterval(() => {
-//         setCounter((prev) => prev - 1);
-//       }, 1000);
-//       return () => clearInterval(timer);
-//     } else {
-//       setOtpBtnDisabled(false);
-//     }
-//   }, [counter]);
-
-//   const handleOnSubmit = async (e) => {
-//     e.preventDefault();
-
-//     const email = emailRef.current.value;
-//     console.log("Email submitted:", email);
-
-//     setOtpPending(true);
-//     setOtpBtnDisabled(true);
-
-//     try {
-//       const response = await requestPassResetOTPApi({ email });
-//       console.log("OTP API response:", response);
-
-//       if (response?.status === "success") {
-//         // Add slight delay before showing OTP form
-//         setTimeout(() => {
-//           setOtpPending(false);
-//           setShowPassResetForm(true);
-//           setCounter(timToRequestOtpAgain);
-//         }, 1500);
-//       } else {
-//         setOtpPending(false);
-//         setOtpBtnDisabled(false);
-//       }
-//     } catch (error) {
-//       console.error("Error while requesting OTP:", error);
-//       setOtpPending(false);
-//       setOtpBtnDisabled(false);
-//     }
-//   };
-
-//   const handleOnPasswordResetSubmit = async (e) => {
-//     e.preventDefault();
-//     const email = emailRef.current.value;
-//     const otp = otpRef.current.value;
-//     const password = passwordRef.current.value;
-//     const confirmPassword = confirmPasswordRef.current.value;
-
-//     console.log({ email, otp, password, confirmPassword });
-
-//     // Add password match validation and API logic here
-//     const respone = await resetPassApi(payload);
-//     if(respone?.status==="success") {
-
-//       //set timeout and will redirect it to login
-//       setTimeout(() => {
-//         navigate("/login")
-//       }, 3000);
-
-//     }
-//   };
-
-//   return (
-//     <div className="forgot-password d-flex justify-content-center align-items-center">
-//       <Card style={{ width: "25rem" }}>
-//         <Card.Body>
-//           <Card.Title>Forgot your password</Card.Title>
-//           <p>Enter your email to get the OTP link to reset your password.</p>
-//           <hr />
-//           <Form onSubmit={handleOnSubmit}>
-//             <Form.Control
-//               type="email"
-//               placeholder="your email@.com"
-//               ref={emailRef}
-//               required
-//             />
-//             <div className="d-grid mt-3">
-//               <Button
-//                 type="submit"
-//                 variant="primary"
-//                 disabled={isOtpBtnDisabled}
-//               >
-//                 {isOtpPending ? (
-//                   <Spinner animation="border" size="sm" />
-//                 ) : counter > 0 ? (
-//                   `Request OTP in ${counter}s`
-//                 ) : (
-//                   "Request OTP"
-//                 )}
-//               </Button>
-//             </div>
-//           </Form>
-
-//           {showPassResetForm && (
-//             <>
-//               <hr />
-//               <Alert variant="success" className="mt-4">
-//                 We have sent an OTP to your email. Please check your inbox or
-//                 spam folder.
-//               </Alert>
-
-//               <Form onSubmit={handleOnPasswordResetSubmit} className="mt-3">
-//                 <Form.Group className="mb-3">
-//                   <Form.Label>OTP</Form.Label>
-//                   <Form.Control
-//                     name="otp"
-//                     type="text"
-//                     placeholder="0000"
-//                     ref={otpRef}
-//                     required
-//                   />
-//                 </Form.Group>
-
-//                 <Form.Group className="mb-3">
-//                   <Form.Label>New Password</Form.Label>
-//                   <Form.Control
-//                     name="password"
-//                     type="password"
-//                     placeholder="******"
-//                     ref={passwordRef}
-//                     required
-//                   />
-//                 </Form.Group>
-
-//                 <Form.Group className="mb-3">
-//                   <Form.Label>Confirm Password</Form.Label>
-//                   <Form.Control
-//                     name="confirmPassword"
-//                     type="password"
-//                     placeholder="******"
-//                     ref={confirmPasswordRef}
-//                     required
-//                   />
-//                 </Form.Group>
-
-//                 <div className="d-grid">
-//                   <Button type="submit" variant="primary">
-//                     Reset Password
-//                   </Button>
-//                 </div>
-//               </Form>
-//             </>
-//           )}
-
-//           <div className="text-end my-3 text-center">
-//             Ready to login? <a href="/login">Login Now</a>
-//           </div>
-//         </Card.Body>
-//       </Card>
-//     </div>
-//   );
-// };
-
-// export default ForgotPassword;
-
-
 import React, { useRef, useState, useEffect } from "react";
-import { Button, Card, Form, Alert, Spinner } from "react-bootstrap";
+import { Button, Card, Form, Alert, Spinner, Container, Row, Col } from "react-bootstrap";
 import { requestPassResetOTPApi, resetPassApi } from "../helpers/axiosHelpers.js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const timToRequestOtpAgain = 30;
 
@@ -198,8 +20,8 @@ const ForgotPassword = () => {
 
   useEffect(() => {
     if (counter > 0) {
-      const timer = setInterval(() => setCounter((prev) => prev - 1), 1000);
-      return () => clearInterval(timer);
+      const t = setInterval(() => setCounter((p) => p - 1), 1000);
+      return () => clearInterval(t);
     } else {
       setOtpBtnDisabled(false);
     }
@@ -207,7 +29,6 @@ const ForgotPassword = () => {
 
   const handleOnSubmit = async (e) => {
     e.preventDefault();
-
     const email = emailRef.current.value.trim().toLowerCase();
     if (!email) return;
 
@@ -215,146 +36,146 @@ const ForgotPassword = () => {
     setOtpBtnDisabled(true);
 
     try {
-      const response = await requestPassResetOTPApi({ email });
-      if (response?.status === "success") {
-        setTimeout(() => {
-          setOtpPending(false);
-          setShowPassResetForm(true);
-          setCounter(timToRequestOtpAgain);
-        }, 1500);
+      const res = await requestPassResetOTPApi({ email });
+      if (res?.status === "success") {
+        setOtpPending(false);
+        setShowPassResetForm(true);
+        setCounter(timToRequestOtpAgain);
       } else {
         setOtpPending(false);
         setOtpBtnDisabled(false);
       }
-    } catch (error) {
-      console.error("Error while requesting OTP:", error);
+    } catch (err) {
       setOtpPending(false);
       setOtpBtnDisabled(false);
+      console.error(err);
     }
   };
 
   const handleOnPasswordResetSubmit = async (e) => {
     e.preventDefault();
-
     const email = emailRef.current.value.trim().toLowerCase();
     const otp = String(otpRef.current.value).trim();
     const password = passwordRef.current.value;
     const confirmPassword = confirmPasswordRef.current.value;
 
-    if (!email || !otp || !password || !confirmPassword) return;
     if (password !== confirmPassword) {
-      alert("Passwords do not match"); // or toast.error(...)
+      alert("Passwords do not match");
       return;
     }
 
     setResetPending(true);
     try {
-      const payload = { email, otp, password };
-      const response = await resetPassApi(payload);
-
-      if (response?.status === "success") {
-        // optional: clear fields
-        otpRef.current.value = "";
-        passwordRef.current.value = "";
-        confirmPasswordRef.current.value = "";
-
-        // redirect to login after short pause
-        setTimeout(() => navigate("/login"), 1500);
+      const res = await resetPassApi({ email, otp, password });
+      if (res?.status === "success") {
+        setTimeout(() => navigate("/login"), 1200);
       }
     } catch (err) {
-      console.error("Reset password failed:", err);
+      console.error(err);
     } finally {
       setResetPending(false);
     }
   };
 
   return (
-    <div className="forgot-password d-flex justify-content-center align-items-center">
-      <Card style={{ width: "25rem" }}>
-        <Card.Body>
-          <Card.Title>Forgot your password</Card.Title>
-          <p>Enter your email to get the OTP link to reset your password.</p>
-          <hr />
-          <Form onSubmit={handleOnSubmit}>
-            <Form.Control
-              type="email"
-              placeholder="your email@.com"
-              ref={emailRef}
-              autoComplete="email"
-              required
-            />
-            <div className="d-grid mt-3">
-              <Button type="submit" variant="primary" disabled={isOtpBtnDisabled}>
-                {isOtpPending ? (
-                  <Spinner animation="border" size="sm" />
-                ) : counter > 0 ? (
-                  `Request OTP in ${counter}s`
-                ) : (
-                  "Request OTP"
-                )}
-              </Button>
-            </div>
-          </Form>
+    <section className="bg-light">
+      <Container className="min-vh-75 d-flex align-items-center py-5">
+        <Row className="justify-content-center w-100">
+          <Col xs={12} sm={10} md={8} lg={5}>
+            <Card className="shadow-sm rounded-4">
+              <Card.Body className="p-4">
+                <Card.Title className="h4 mb-2 text-center">Forgot your password</Card.Title>
+                <p className="text-secondary text-center mb-4">
+                  Enter your email to receive a one‑time code (OTP) to reset your password.
+                </p>
 
-          {showPassResetForm && (
-            <>
-              <hr />
-              <Alert variant="success" className="mt-4">
-                We have sent an OTP to your email. Please check your inbox or spam folder.
-              </Alert>
+                {/* Step 1: Request OTP */}
+                <Form onSubmit={handleOnSubmit} className="mb-3">
+                  <Form.Group>
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="you@email.com"
+                      ref={emailRef}
+                      autoComplete="email"
+                      required
+                    />
+                    <Form.Text className="text-muted">We’ll send the OTP to this address.</Form.Text>
+                  </Form.Group>
 
-              <Form onSubmit={handleOnPasswordResetSubmit} className="mt-3">
-                <Form.Group className="mb-3">
-                  <Form.Label>OTP</Form.Label>
-                  <Form.Control
-                    name="otp"
-                    type="text"
-                    placeholder="0000"
-                    ref={otpRef}
-                    autoComplete="one-time-code"
-                    required
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>New Password</Form.Label>
-                  <Form.Control
-                    name="password"
-                    type="password"
-                    placeholder="******"
-                    ref={passwordRef}
-                    autoComplete="new-password"
-                    required
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Confirm Password</Form.Label>
-                  <Form.Control
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="******"
-                    ref={confirmPasswordRef}
-                    autoComplete="new-password"
-                    required
-                  />
-                </Form.Group>
-
-                <div className="d-grid">
-                  <Button type="submit" variant="primary" disabled={isResetPending}>
-                    {isResetPending ? <Spinner animation="border" size="sm" /> : "Reset Password"}
+                  <Button
+                    type="submit"
+                    className="w-100 mt-3"
+                    variant="primary"
+                    disabled={isOtpBtnDisabled}
+                  >
+                    {isOtpPending ? (
+                      <Spinner animation="border" size="sm" />
+                    ) : counter > 0 ? (
+                      `Resend in ${counter}s`
+                    ) : (
+                      "Send OTP"
+                    )}
                   </Button>
-                </div>
-              </Form>
-            </>
-          )}
+                </Form>
 
-          <div className="text-end my-3 text-center">
-            Ready to login? <a href="/login">Login Now</a>
-          </div>
-        </Card.Body>
-      </Card>
-    </div>
+                {/* Step 2: Reset with OTP */}
+                {showPassResetForm && (
+                  <>
+                    <Alert variant="success" className="mb-3">
+                      OTP sent. Check your inbox or spam folder.
+                    </Alert>
+
+                    <Form onSubmit={handleOnPasswordResetSubmit}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>OTP</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="000000"
+                          ref={otpRef}
+                          autoComplete="one-time-code"
+                          required
+                        />
+                      </Form.Group>
+
+                      <Form.Group className="mb-3">
+                        <Form.Label>New password</Form.Label>
+                        <Form.Control
+                          type="password"
+                          placeholder="********"
+                          ref={passwordRef}
+                          autoComplete="new-password"
+                          required
+                        />
+                      </Form.Group>
+
+                      <Form.Group className="mb-4">
+                        <Form.Label>Confirm new password</Form.Label>
+                        <Form.Control
+                          type="password"
+                          placeholder="********"
+                          ref={confirmPasswordRef}
+                          autoComplete="new-password"
+                          required
+                        />
+                      </Form.Group>
+
+                      <Button type="submit" className="w-100" disabled={isResetPending}>
+                        {isResetPending ? <Spinner animation="border" size="sm" /> : "Reset password"}
+                      </Button>
+                    </Form>
+                  </>
+                )}
+
+                <div className="text-center mt-4">
+                  Ready to login? <Link to="/login">Login now</Link>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </section>
   );
 };
 

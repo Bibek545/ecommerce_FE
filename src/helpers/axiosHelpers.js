@@ -23,7 +23,7 @@ export const apiProcesser = async ({
     Authorization: isPrivate
       ? isRefreshJwt
         ? getRefreshJWT()
-        : getAccessJWT()
+        : "Bearer " + getAccessJWT()
       : null,
     "Content-Type": contentType,
   };
@@ -107,6 +107,8 @@ export const resetPassApi = async (payload) => {
 };
 
 
+
+
 //categories//
 export const getAllCategories = () => apiProcesser({ url: categoriesEP });
 export const getCategoryById = (id) =>
@@ -119,3 +121,16 @@ export const getProductById = (id) =>
   apiProcesser({ url: `${productsEP}/${id}` });
 export const getProductsByCatId = (id) =>
   apiProcesser({ url: `${productsEP}?category=${id}` });
+
+// getting order by Id
+export const getOrderByTrackingId = async (trackingId) => {
+  const obj = {
+    url: `${rootURL}customer/v1/orders/track/${trackingId}`,
+
+    method: "get",
+    isPrivate: false, // public route, no token needed
+    showToast: false,
+  };
+
+  return await apiProcesser(obj);
+};

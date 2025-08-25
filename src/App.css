@@ -24,12 +24,12 @@
 a:hover {
   color: var(--accent) !important;
 }
-<<<<<<< HEAD
+
 .login {
  border: 1px solid black;
  min-height: 90vh;
 }
-=======
+
 
 footer p {
   margin-bottom: 0.4rem;
@@ -38,4 +38,6 @@ footer p {
 footer h6 {
   font-size: 1rem;
 }
->>>>>>> upstream/main
+/* place in a global css file that’s already imported */
+.min-vh-75 { min-height: 75vh; }
+

@@ -15,6 +15,8 @@ export const VerifyUser = () => {
     const [message, setMessage] = useState("");
     const [variant, setVariant] = useState("info");
       const [status, setStatus] = useState(""); // NEW state to track status
+      const [hasVerified, setHasVerified] = useState(false);
+
 
 
     useEffect(()=> {
